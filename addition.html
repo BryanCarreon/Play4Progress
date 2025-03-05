@@ -18,6 +18,40 @@
             height: 100vh;
             margin: 0;
         }
+        .game-area {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            position: relative;
+        }
+        .progress-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 250px;
+            width: 50px;
+            background: #ddd;
+            border-radius: 20px;
+            position: absolute;
+            left: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 0%;
+            background: gold;
+            position: absolute;
+            bottom: 0;
+            transition: height 0.5s ease;
+        }
+        .trophy {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            top: -60px;
+        }
         .container {
             background: rgba(255, 255, 255, 0.9);
             padding: 40px;
@@ -27,21 +61,22 @@
             flex-direction: column;
             align-items: center;
             width: 50%;
+            max-width: 600px;
             position: relative;
         }
-        .timer {
-            position: absolute;
-            top: -60px;
-            width: 100px;
-            height: 100px;
+        .clock {
+            font-size: 24px;
+            font-weight: bold;
+            background: white;
+            padding: 10px;
             border-radius: 50%;
-            background: #ffcc5c;
+            width: 70px;
+            height: 70px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: absolute;
+            top: -40px;
         }
         .question {
             font-size: 48px;
@@ -55,7 +90,6 @@
             font-size: 24px;
             width: 120px;
             text-align: center;
-            margin: 10px;
             border: 3px solid #ffcc5c;
             border-radius: 10px;
         }
@@ -77,65 +111,68 @@
             font-weight: bold;
             margin-top: 20px;
         }
-        .disabled {
-            pointer-events: none;
-            opacity: 0.5;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="timer" class="timer">5:00</div>
-        <h1>ADDITION DRILL!</h1>
-        <p id="question" class="question">Loading...</p>
-        <input type="number" id="answer" class="input-box" placeholder="Type answer">
-        <button class="submit-btn" id="submitBtn" onclick="checkAnswer()">Submit</button>
-        <p id="feedback"></p>
+    <div class="progress-container">
+        <img src="https://www.avezano.com/cdn/shop/products/TW-1577.jpg?v=1690787827" class="trophy">
+        <div class="progress-bar"></div>
     </div>
-
+    <div class="game-area">
+        <div class="container">
+            <div class="clock" id="timer">05:00</div>
+            <h1>ADDITION DRILL!</h1>
+            <p id="question" class="question">Loading...</p>
+            <input type="number" id="answer" class="input-box" placeholder="Type answer">
+            <button class="submit-btn" onclick="checkAnswer()">Submit</button>
+            <p id="feedback"></p>
+        </div>
+    </div>
+    
     <script>
         let level = 1;
         let correctAnswers = 0;
         let correctAnswer;
-        let timeLeft = 10; // 5 minutes in seconds
-        let timerInterval;
-        
+        let timer;
+        let timeLeft = 20;
+        let gameActive = true;
+        let progress = 0;
+
         function startTimer() {
-            timerInterval = setInterval(() => {
-                let minutes = Math.floor(timeLeft / 60);
-                let seconds = timeLeft % 60;
-                document.getElementById("timer").textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            timer = setInterval(() => {
                 if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    document.getElementById("timer").textContent = "Time's Up!";
-                    document.getElementById("submitBtn").classList.add("disabled");
-                    document.getElementById("answer").disabled = true;
-                    document.getElementById("feedback").textContent = "Time's up!";
-                    document.getElementById("feedback").style.color = "red";
+                    clearInterval(timer);
+                    document.getElementById("timer").textContent = "Time's up!";
+                    gameActive = false;
+                } else {
+                    let minutes = Math.floor(timeLeft / 60);
+                    let seconds = timeLeft % 60;
+                    document.getElementById("timer").textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    timeLeft--;
                 }
-                timeLeft--;
             }, 1000);
         }
 
         function generateAdditionProblem(level) {
+            if (!gameActive) return;
             const ranges = { 1: [1, 5], 2: [1, 10], 3: [1, 15], 4: [1, 20] };
             let [minVal, maxVal] = ranges[level] || [1, 5];
             let num1 = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
             let num2 = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
             correctAnswer = num1 + num2;
-            
             document.getElementById("question").textContent = `${num1} + ${num2} = ?`;
         }
 
         function checkAnswer() {
-            if (timeLeft <= 0) return; // Prevent answers after time is up
-            
+            if (!gameActive) return;
             let userAnswer = parseInt(document.getElementById("answer").value);
             let feedback = document.getElementById("feedback");
             if (userAnswer === correctAnswer) {
                 feedback.textContent = "Correct!";
                 feedback.style.color = "green";
                 correctAnswers++;
+                progress = (correctAnswers % 5) * 20;
+                document.querySelector(".progress-bar").style.height = progress + "%";
                 if (correctAnswers % 5 === 0) {
                     level = Math.min(level + 1, 4);
                     alert(`Great job! Moving to level ${level}.`);
@@ -143,7 +180,6 @@
             } else {
                 feedback.textContent = `Incorrect! The correct answer was ${correctAnswer}.`;
                 feedback.style.color = "red";
-                correctAnswers = Math.max(0, correctAnswers - 1);
             }
             document.getElementById("answer").value = "";
             setTimeout(presentProblem, 1000);
@@ -153,7 +189,7 @@
             generateAdditionProblem(level);
         }
 
-        window.onload = () => {
+        window.onload = function() {
             presentProblem();
             startTimer();
         };
