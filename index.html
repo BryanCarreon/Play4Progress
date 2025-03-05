@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Progress Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        table { width: 80%; margin: 20px auto; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 10px; }
+        .add-btn { margin: 10px; padding: 10px 20px; cursor: pointer; }
+        .remove-btn { padding: 5px 10px; cursor: pointer; background-color: red; color: white; border: none; }
+        .mastery-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid black; display: inline-block; text-align: center; line-height: 30px; cursor: pointer; margin: 2px; }
+        .shaded { background-color: gray; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Student Progress Tracker</h1>
+    <button class="add-btn" onclick="addStudent()">Add Student</button>
+    <table>
+        <thead>
+            <tr>
+                <th>Students</th>
+                <th>Mastered</th>
+                <th>Grade Lv.</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="student-table">
+            <tr>
+                <td>Rigoberta L.</td>
+                <td>
+                    <span class="mastery-btn" onclick="toggleShade(this)">+</span>
+                    <span class="mastery-btn" onclick="toggleShade(this)">−</span>
+                    <span class="mastery-btn" onclick="toggleShade(this)">×</span>
+                    <span class="mastery-btn" onclick="toggleShade(this)">÷</span>
+                </td>
+                <td>2nd</td>
+                <td><button class="remove-btn" onclick="removeStudent(this)">Remove</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        function addStudent() {
+            let name = prompt("Enter student name:");
+            let grade = prompt("Enter grade level:");
+            if (name && grade) {
+                let table = document.getElementById("student-table");
+                let row = table.insertRow();
+                row.insertCell(0).innerText = name;
+                let masteryCell = row.insertCell(1);
+                let symbols = ['+', '−', '×', '÷'];
+                symbols.forEach(symbol => {
+                    let span = document.createElement("span");
+                    span.className = "mastery-btn";
+                    span.innerText = symbol;
+                    span.onclick = function() { toggleShade(this); };
+                    masteryCell.appendChild(span);
+                });
+                row.insertCell(2).innerText = grade;
+                let removeCell = row.insertCell(3);
+                let removeButton = document.createElement("button");
+                removeButton.className = "remove-btn";
+                removeButton.innerText = "Remove";
+                removeButton.onclick = function() { removeStudent(this); };
+                removeCell.appendChild(removeButton);
+            }
+        }
+
+        function toggleShade(element) {
+            element.classList.toggle("shaded");
+        }
+
+        function removeStudent(button) {
+            let row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+    </script>
+</body>
+</html>
