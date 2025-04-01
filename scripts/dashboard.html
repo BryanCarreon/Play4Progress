@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+</head>
+<body>
+  <h2>Welcome, <span id="userEmailDisplay"></span></h2>
+  <button id="logoutButton">Log Out</button>
+
+  <h3>Your Students</h3>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Addition</th>
+        <th>Subtraction</th>
+        <th>Multiplication</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="studentTableBody">
+      <!-- Populated by JS -->
+    </tbody>
+  </table>
+
+  <h4>Add New Student</h4>
+  <input type="text" id="newStudentName" placeholder="Student Name">
+  <button id="addStudentButton">Add Student</button>
+
+  <script type="module" src="dashboard.js"></script>
+  <script type="module" src="auth.js"></script>
+
+
+</body>
+</html>
