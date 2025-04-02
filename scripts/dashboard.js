@@ -32,8 +32,10 @@ const studentTableBody = document.getElementById("studentTableBody");
 onAuthStateChanged(auth, async (user) => {
     if (!user) return window.location.href = "login.html";
 
+    if (userEmailDisplay) {
     userEmailDisplay.textContent = user.email;
-
+    }
+    
     const studentsRef = collection(db, "users", user.uid, "students");
     const snapshot = await getDocs(studentsRef);
 
@@ -41,36 +43,73 @@ onAuthStateChanged(auth, async (user) => {
     snapshot.forEach(docSnap => {
     const student = docSnap.data();
     const row = document.createElement("tr");
+    const progress = student.progress || {};
+    // const progressDisplay = Object.entries(progress)
+    // .sort((a, b) => {
+    //     const levelA = parseInt(a[0].split(" ")[1]);
+    //     const levelB = parseInt(b[0].split(" ")[1]);
+    //     return levelA - levelB;
+    //   })
+    const subjects = ["addition", "subtraction", "multiplication"];
+
+// Create a display per subject
+    const progressDisplays = subjects.map(subject => {
+    const subjectProgress = progress[subject] || {};
+    if (!subjectProgress || typeof subjectProgress !== 'object') {
+        return "—"; // No progress for this subject
+      }
+    
+      const display = Object.entries(subjectProgress)
+        .sort((a, b) => {
+          const aLevel = parseInt(a[0].split(" ")[1]);
+          const bLevel = parseInt(b[0].split(" ")[1]);
+          return aLevel - bLevel;
+        })
+        .map(([level, status]) => `${level}: ${status}`)
+        .join("<br>");
+        return display || "—";
+    });
+
+    //this is from the html below:
+    // <td>${student.scores?.addition ?? "—"}</td>
+    // <td>${student.scores?.subtraction ?? "—"}</td>
+    // <td>${student.scores?.multiplication ?? "—"}</td>
+    //  <td>${progressDisplay}</td>
+    console.log("Student:", student.name, "Progress:", progressDisplays);
 
     row.innerHTML = `
       <td>${student.name}</td>
-      <td>${student.scores?.addition ?? "—"}</td>
-      <td>${student.scores?.subtraction ?? "—"}</td>
-      <td>${student.scores?.multiplication ?? "—"}</td>
+  <td>${progressDisplays[0]}</td> <!-- Addition -->
+  <td>${progressDisplays[1]}</td> <!-- Subtraction -->
+  <td>${progressDisplays[2]}</td> <!-- Multiplication -->
       <td>
         <button onclick="selectStudent('${docSnap.id}', '${student.name}')">Select</button>
         <button onclick="removeStudent('${docSnap.id}')">Remove</button>
       </td>
     `;
-
-    studentTableBody.appendChild(row);
+    
+    if (studentTableBody) {
+        studentTableBody.appendChild(row);
+      }
+    //studentTableBody.appendChild(row);
   });
 });
 
 // Add student
+if (addStudentButton){
 addStudentButton.addEventListener("click", async () => {
     const nameInput = document.getElementById("newStudentName");
     const studentName = nameInput.value.trim();
   
     if (!studentName) return alert("Enter a student name");
   
-  // 🔐 Optionally sanitize the name to use as a Firestore-safe ID
+  // Optionally sanitize the name to use as a Firestore-safe ID
   const studentId = studentName.replace(/\s+/g, "_").toLowerCase();
 
   // Reference to students/{studentId}
   const studentRef = doc(db, "users", auth.currentUser.uid, "students", studentId);
 
-  // Optional: check if student already exists
+  // check if student already exists
   const existing = await getDoc(studentRef);
   if (existing.exists()) {
     return alert("A student with this name already exists.");
@@ -82,6 +121,26 @@ addStudentButton.addEventListener("click", async () => {
       addition: null,
       subtraction: null,
       multiplication: null
+    },
+    progress: {
+      addition: {
+        "level 1": "uncomplete",
+        "level 2": "uncomplete",
+        "level 3": "uncomplete",
+        "level 4": "uncomplete"
+      } ,
+      subtraction: {
+        "level 1": "uncomplete",
+        "level 2": "uncomplete",
+        "level 3": "uncomplete",
+        "level 4": "uncomplete"
+      },
+      multiplication: {
+        "level 1": "uncomplete",
+        "level 2": "uncomplete",
+        "level 3": "uncomplete",
+        "level 4": "uncomplete"
+      }
     }
   });
     // const studentsRef = collection(db, "users", auth.currentUser.uid, "students");
@@ -97,6 +156,7 @@ addStudentButton.addEventListener("click", async () => {
   
     window.location.reload();
   });
+}
 
   // Remove student
 window.removeStudent = async (studentId) => {
@@ -109,7 +169,7 @@ window.removeStudent = async (studentId) => {
   window.selectStudent = (id, name) => {
     localStorage.setItem("selectedStudentId", id);
     localStorage.setItem("selectedStudentName", name);
-    // Redirect to math activity page
-    //window.location.href = "math.html";
+    // redirect to math activity page
+    window.location.href = "../addition.html";
   };
 

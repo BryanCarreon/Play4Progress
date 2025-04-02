@@ -1,8 +1,27 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { firebaseConfig } from './scripts/firebase-config.js'; // adjust path if needed
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const selectedId = localStorage.getItem("selectedStudentId");
+const selectedName = localStorage.getItem("selectedStudentName");
+if (!selectedId || !selectedName) {
+    alert("No student selected. Redirecting to dashboard...");
+    window.location.href = "scripts/dashboard.html";
+  }
+  window.onload = function () {
+    presentProblem();
+    startTimer();
+  };
+
 let level = 1;
 let correctAnswers = 0;
 let correctAnswer;
 let timer;
-let timeLeft = 20;
+let timeLeft = 300;
 let gameActive = true;
 let progress = 0;
 
@@ -42,6 +61,20 @@ function checkAnswer() {
         progress = (correctAnswers % 5) * 20;
         document.querySelector(".progress-bar").style.height = progress + "%";
         if (correctAnswers % 5 === 0) {
+            const completedLevel = `level ${level}`;
+            // Update Firestore with completed level
+            const studentRef = doc(db, "users", auth.currentUser.uid, "students", selectedId);
+            updateDoc(studentRef, {
+              [`progress.addition.${completedLevel}`]: "complete"
+            })
+            //;
+            .then(() => {
+                console.log(`Saved: ${completedLevel} marked complete for ${selectedId}`);
+            })
+            .catch((error) => {
+                console.error("Error updating progress:", error);
+            });
+
             level = Math.min(level + 1, 4);
             alert(`Great job! Moving to level ${level}.`);
         }
@@ -61,3 +94,12 @@ window.onload = function() {
     presentProblem();
     startTimer();
 };
+
+function endGame() {
+    localStorage.removeItem("selectedStudentId");
+    localStorage.removeItem("selectedStudentName");
+    window.location.href = "scripts/dashboard.html";
+  }
+  
+window.checkAnswer = checkAnswer;
+window.endGame = endGame;
