@@ -1,0 +1,2 @@
+brew install pillow
+python3 addition.py
