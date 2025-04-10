@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { firebaseConfig } from './scripts/firebase-config.js'; // adjust path if needed
+import { firebaseConfig } from './firebase-config.js'; // adjust path if needed
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -10,7 +10,7 @@ const selectedId = localStorage.getItem("selectedStudentId");
 const selectedName = localStorage.getItem("selectedStudentName");
 if (!selectedId || !selectedName) {
     alert("No student selected. Redirecting to dashboard...");
-    window.location.href = "scripts/dashboard.html";
+    window.location.href = "./dashboard.html";
   }
   window.onload = function () {
     presentProblem();
@@ -98,7 +98,7 @@ window.onload = function() {
 function endGame() {
     localStorage.removeItem("selectedStudentId");
     localStorage.removeItem("selectedStudentName");
-    window.location.href = "scripts/dashboard.html";
+    window.location.href = "dashboard.html";
   }
   
 window.checkAnswer = checkAnswer;

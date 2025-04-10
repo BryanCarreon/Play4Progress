@@ -19,7 +19,8 @@ if(registerButton){
     .then(async(userCredential) => {
       const user = userCredential.user;
       alert("Sign up successful!");
-
+      window.location.href = "login.html";
+      
       console.log("User signed up:", user.email);
         // OPTIONAL: Save username to Realtime Database later
         // ✅ Store user email in Firestore
