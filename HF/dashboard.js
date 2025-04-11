@@ -183,5 +183,6 @@ window.removeStudent = async (studentId) => {
     window.location.href = "./multiplication.html";
     window.location.href = "./division.html";
     window.location.href = "./addition.html";
+    window.location.href = "./student_home_page.html";
   };
 
