@@ -178,9 +178,10 @@ window.removeStudent = async (studentId) => {
     localStorage.setItem("selectedStudentId", id);
     localStorage.setItem("selectedStudentName", name);
     // redirect to math activity page
-    window.location.href = "./addition.html";
+//ADD function for selecting a specific function
     window.location.href = "./subtraction.html";
     window.location.href = "./multiplication.html";
     window.location.href = "./division.html";
+    window.location.href = "./addition.html";
   };
 

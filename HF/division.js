@@ -65,7 +65,7 @@ function checkAnswer() {
             // Update Firestore with completed level
             const studentRef = doc(db, "users", auth.currentUser.uid, "students", selectedId);
             updateDoc(studentRef, {
-              [`progress.addition.${completedLevel}`]: "complete"
+              [`progress.division.${completedLevel}`]: "complete"
             })
             //;
             .then(() => {
