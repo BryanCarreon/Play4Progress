@@ -50,7 +50,7 @@ onAuthStateChanged(auth, async (user) => {
     //     const levelB = parseInt(b[0].split(" ")[1]);
     //     return levelA - levelB;
     //   })
-    const subjects = ["addition", "subtraction", "multiplication"];
+    const subjects = ["addition", "subtraction", "multiplication", "division"];
 
 // Create a display per subject
     const progressDisplays = subjects.map(subject => {
@@ -82,6 +82,7 @@ onAuthStateChanged(auth, async (user) => {
   <td>${progressDisplays[0]}</td> <!-- Addition -->
   <td>${progressDisplays[1]}</td> <!-- Subtraction -->
   <td>${progressDisplays[2]}</td> <!-- Multiplication -->
+  <td>${progressDisplays[3]}</td> <!-- Division -->
       <td>
         <button onclick="selectStudent('${docSnap.id}', '${student.name}')">Select</button>
         <button onclick="removeStudent('${docSnap.id}')">Remove</button>
@@ -120,26 +121,33 @@ addStudentButton.addEventListener("click", async () => {
     scores: {
       addition: null,
       subtraction: null,
-      multiplication: null
+      multiplication: null,
+      division: null
     },
     progress: {
       addition: {
-        "level 1": "uncomplete",
-        "level 2": "uncomplete",
-        "level 3": "uncomplete",
-        "level 4": "uncomplete"
+        "level 1": "incomplete",
+        "level 2": "incomplete",
+        "level 3": "incomplete",
+        "level 4": "incomplete"
       } ,
       subtraction: {
-        "level 1": "uncomplete",
-        "level 2": "uncomplete",
-        "level 3": "uncomplete",
-        "level 4": "uncomplete"
+        "level 1": "incomplete",
+        "level 2": "incomplete",
+        "level 3": "incomplete",
+        "level 4": "incomplete"
       },
       multiplication: {
-        "level 1": "uncomplete",
-        "level 2": "uncomplete",
-        "level 3": "uncomplete",
-        "level 4": "uncomplete"
+        "level 1": "incomplete",
+        "level 2": "incomplete",
+        "level 3": "incomplete",
+        "level 4": "incomplete"
+      },
+      division: {
+        "level 1": "incomplete",
+        "level 2": "incomplete",
+        "level 3": "incomplete",
+        "level 4": "incomplete"
       }
     }
   });
@@ -170,6 +178,10 @@ window.removeStudent = async (studentId) => {
     localStorage.setItem("selectedStudentId", id);
     localStorage.setItem("selectedStudentName", name);
     // redirect to math activity page
+//ADD function for selecting a specific function
+    window.location.href = "./subtraction.html";
+    window.location.href = "./multiplication.html";
+    window.location.href = "./division.html";
     window.location.href = "./addition.html";
   };
 
