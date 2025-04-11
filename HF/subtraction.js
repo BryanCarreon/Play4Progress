@@ -62,6 +62,19 @@ function checkAnswer() {
         progress = (correctAnswers % 5) * 20;
         document.querySelector(".progress-bar").style.height = progress + "%";
         if (correctAnswers % 5 === 0) {
+            const completedLevel = `level ${level}`;
+            // Update Firestore with completed level
+            const studentRef = doc(db, "users", auth.currentUser.uid, "students", selectedId);
+            updateDoc(studentRef, {
+                [`progress.subtraction.${completedLevel}`]: "complete"
+            })
+            //;
+            .then(() => {
+                console.log(`Saved: ${completedLevel} marked complete for ${selectedId}`);
+            })
+            .catch((error) => {
+                console.error("Error updating progress:", error);
+            });
             level = Math.min(level + 1, 4);
             alert(`Great job! Moving to level ${level}.`);
         }
