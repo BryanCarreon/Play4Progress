@@ -81,3 +81,12 @@ window.onload = function() {
     presentProblem();
     startTimer();
 };
+
+function endGame() {
+    localStorage.removeItem("selectedStudentId");
+    localStorage.removeItem("selectedStudentName");
+    window.location.href = "dashboard.html";
+  }
+  
+window.checkAnswer = checkAnswer;
+window.endGame = endGame;
