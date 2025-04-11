@@ -59,7 +59,7 @@
 <body>
 
 <div class="container">
-    <h2>Welcome Back, <span id="studentName">Rigoberta L.!</span></h2>
+    <h2>Welcome Back, <span id="studentName">Student!</span></h2>
     <p>Selected Drill:</p>
     <div class="drill-box" id="selectedDrill">Addition</div>
     <button class="start-btn" onclick="startDrill()">Start!</button>
@@ -67,7 +67,15 @@
     <button class="logout-btn" onclick="goBack()">Exit</button>
 </div>
 
+
 <script>
+
+    ////populate student name from local storage
+    const studentName = localStorage.getItem("selectedStudentName");
+    if(studentName) {
+        document.getElementById("studentName").textContent = studentName;
+    }
+
     function startDrill() {
         // Redirect to drill page (you can change 'drill.html' to the actual drill page)
         window.location.href = "addition.html";
