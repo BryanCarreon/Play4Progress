@@ -98,7 +98,9 @@
 </div>
 
 
+
 <script type="module">
+    //type module so that i can import from auth.js
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
     import { firebaseConfig } from './firebase-config.js';
@@ -110,7 +112,7 @@
     const studentName = localStorage.getItem("selectedStudentName");
     const selectedSubject = localStorage.getItem("selectedSubject");
     const studentId = localStorage.getItem("selectedStudentId");
-    const teacherUid = localStorage.getItem("teacherUid"); // This should be stored at login
+    const teacherUid = localStorage.getItem("teacherUid"); // This should be stored at login//just added it
     
     if (studentName) {
       document.getElementById("studentName").textContent = studentName;
@@ -119,51 +121,83 @@
       document.getElementById("selectedDrill").textContent = selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1);
     }
     
-    function startDrill() {
+    //attaching window make the function globally accessible even 
+    //from a <script type="modlue"
+    window.startDrill = function() {
       if (selectedSubject) {
         window.location.href = `${selectedSubject}.html`;
       }
-    }
+    };
     
-    function goBack() {
+    window.goBack = function() {
       window.location.href = "dashboard.html";
-    }
+    };
     
     // Badge display
     const badgeContainer = document.getElementById("badgesContainer");
     
     const badgeList = [
-      { key: "first_drill_completed", label: "First Drill" },
-      { key: "addition_master", label: "Addition Master" },
-      { key: "subtraction_master", label: "Subtraction Master" },
-      { key: "multiplication_master", label: "Multiplication Master" },
-      { key: "division_master", label: "Division Master" },
-      { key: "streak_3_days", label: "3-Day Streak" }
+        { key: "first_drill_completed", label: "First Drill", icon: "🏁" },
+        { key: "addition_master", label: "Addition Master", icon: "➕" },
+        { key: "subtraction_master", label: "Subtraction Master", icon: "➖" },
+        { key: "multiplication_master", label: "Multiplication Master", icon: "✖️" },
+        { key: "division_master", label: "Division Master", icon: "➗" },
+        { key: "streak_3_days", label: "3-Day Streak", icon: "🔥" }
     ];
+
     
     async function loadBadges() {
-      if (!teacherUid || !studentId) return;
-    
-      const studentRef = doc(db, "users", teacherUid, "students", studentId);
-      const snapshot = await getDoc(studentRef);
-    
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        const badges = data.badges || {};
-    
         badgeContainer.innerHTML = "";
-    
+
+        if (!teacherUid || !studentId) {
+            console.warn("Missing teacherUid or studentId.");
+            return;
+        }
+
+        const studentRef = doc(db, "users", teacherUid, "students", studentId);
+        const snapshot = await getDoc(studentRef);
+
+        let badges = {};
+
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            badges = data.badges || {};
+
+            // Optional fallback: if badges are missing entirely
+            if (Object.keys(badges).length === 0) {
+                console.warn("No badges found in Firestore. Falling back to test badges.");
+                badges = {
+                    first_drill_completed: true,
+                    addition_master: false,
+                    subtraction_master: true,
+                    multiplication_master: false,
+                    division_master: true,
+                    streak_3_days: false
+                };
+            }
+        } else {
+            badgeContainer.innerHTML = "<p>Unable to load student data.</p>";
+            return;
+        }
+
+        // Render each badge
         badgeList.forEach(badge => {
-          const div = document.createElement("div");
-          div.className = "badge";
-          if (badges[badge.key]) div.classList.add("earned");
-          div.textContent = badge.label;
-          badgeContainer.appendChild(div);
+            const earned = badges[badge.key];
+            console.log(`Rendering badge: ${badge.key} | earned: ${earned}`);
+
+            const div = document.createElement("div");
+            div.className = "badge";
+            if (earned) div.classList.add("earned");
+
+            div.innerHTML = `
+                <div style="font-size: 28px;">${badge.icon}</div>
+                <div style="font-size: 12px; margin-top: 5px;">${badge.label}</div>
+            `;
+            badgeContainer.appendChild(div);
         });
-      } else {
-        badgeContainer.innerHTML = "<p>Unable to load badges.</p>";
-      }
-    }
+    }  
+      
+       
     
     loadBadges();
     </script>

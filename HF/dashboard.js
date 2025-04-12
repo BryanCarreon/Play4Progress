@@ -150,7 +150,7 @@ addStudentButton.addEventListener("click", async () => {
         "level 2": "incomplete",
         "level 3": "incomplete",
         "level 4": "incomplete"
-      } ,
+      },
       subtraction: {
         "level 1": "incomplete",
         "level 2": "incomplete",
@@ -206,6 +206,7 @@ window.selectSubject = (id, name, subject) => {
   localStorage.setItem("selectedStudentId", id);
   localStorage.setItem("selectedStudentName", name);
   localStorage.setItem("selectedSubject", subject);
+  localStorage.setItem("teacherUid", auth.currentUser.uid);
   window.location.href = "student_home_page.html";
   };
 
