@@ -198,6 +198,6 @@ window.selectSubject = (id, name, subject) => {
   localStorage.setItem("selectedStudentId", id);
   localStorage.setItem("selectedStudentName", name);
   localStorage.setItem("selectedSubject", subject);
-  window.location.href = `./${subject}.html`;
+  window.location.href = "student_home_page.html";
   };
 
