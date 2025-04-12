@@ -3,13 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <title>Dashboard</title>
+  <style>
+    tr:hover {
+      background-color: #a5a2a2;
+    }
+    table {
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+    }
+    button:hover {
+      color: rgb(20, 159, 55);
+      transform: scale(1.1);
+    }
+  </style>
 </head>
 <body>
   <h2>Welcome, <span id="userEmailDisplay"></span></h2>
   <button id="logoutButton">Log Out</button>
 
   <h3>Your Students</h3>
-  <table border="2">
+  <table border="2" >
     <thead>
       <tr>
         <th>Name</th>
@@ -18,7 +33,7 @@
         <th>Multiplication</th>
         <th>Division</th>
         <!-- <th>Progress</th> -->
-        <th>Actions</th>
+        <!-- <th>Actions</th> -->
       </tr>
     </thead>
     <tbody id="studentTableBody">

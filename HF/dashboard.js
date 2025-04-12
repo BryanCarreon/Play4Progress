@@ -78,21 +78,41 @@ onAuthStateChanged(auth, async (user) => {
     console.log("Student:", student.name, "Progress:", progressDisplays);
 
     row.innerHTML = `
-      <td>${student.name}</td>
-  <td>${progressDisplays[0]}</td> <!-- Addition -->
-  <td>${progressDisplays[1]}</td> <!-- Subtraction -->
-  <td>${progressDisplays[2]}</td> <!-- Multiplication -->
-  <td>${progressDisplays[3]}</td> <!-- Division -->
-      <td>
-        <button onclick="selectStudent('${docSnap.id}', '${student.name}')">Select</button>
-        <button onclick="removeStudent('${docSnap.id}')">Remove</button>
-      </td>
+  <td>${student.name}</td>
+  <td>
+    ${progressDisplays[0]}<br>
+    <button onclick="selectSubject('${docSnap.id}', '${student.name}', 'addition')">Start</button>
+  </td>
+  <td>
+    ${progressDisplays[1]}<br>
+    <button onclick="selectSubject('${docSnap.id}', '${student.name}', 'subtraction')">Start</button>
+  </td>
+  <td>
+    ${progressDisplays[2]}<br>
+    <button onclick="selectSubject('${docSnap.id}', '${student.name}', 'multiplication')">Start</button>
+  </td>
+  <td>
+    ${progressDisplays[3]}<br>
+    <button onclick="selectSubject('${docSnap.id}', '${student.name}', 'division')">Start</button>
+  </td>
+  <td>
+  <button onclick="removeStudent('${docSnap.id}')"
+  style="
+    background: none;
+    border: none;
+    color: red;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+  "
+  title="Remove Student"
+  >✖</button>
+  </td>
     `;
     
     if (studentTableBody) {
         studentTableBody.appendChild(row);
       }
-    //studentTableBody.appendChild(row);
   });
 });
 
@@ -174,15 +194,10 @@ window.removeStudent = async (studentId) => {
   };
   
   // Select student (can be saved in localStorage for next page)
-  window.selectStudent = (id, name) => {
-    localStorage.setItem("selectedStudentId", id);
-    localStorage.setItem("selectedStudentName", name);
-    // redirect to math activity page
-//ADD function for selecting a specific function
-    window.location.href = "./subtraction.html";
-    window.location.href = "./multiplication.html";
-    window.location.href = "./division.html";
-    window.location.href = "./addition.html";
-    window.location.href = "./student_home_page.html";
+window.selectSubject = (id, name, subject) => {
+  localStorage.setItem("selectedStudentId", id);
+  localStorage.setItem("selectedStudentName", name);
+  localStorage.setItem("selectedSubject", subject);
+  window.location.href = `./${subject}.html`;
   };
 
