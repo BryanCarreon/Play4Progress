@@ -169,6 +169,14 @@ addStudentButton.addEventListener("click", async () => {
         "level 3": "incomplete",
         "level 4": "incomplete"
       }
+    },
+    badges:{
+      first_drill_completed: false,
+      addition_master: false,
+      subtraction_master: false,
+      multiplication_master: false,
+      division_master: false,
+      streak_3_days: false
     }
   });
     // const studentsRef = collection(db, "users", auth.currentUser.uid, "students");
