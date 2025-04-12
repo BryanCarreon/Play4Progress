@@ -54,6 +54,34 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        .badge-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .badge {
+            width: 100px;
+            height: 100px;
+            background-color: lightgray;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            text-align: center;
+            padding: 8px;
+            color: #fff;
+            font-weight: bold;
+            transition: 0.3s;
+            filter: grayscale(100%); /* greys out unearned badges */
+        }
+        .badge.earned {
+            background-color: #ffc107; /* gold */
+            filter: grayscale(0%); /* full color if earned */
+        }
+
     </style>
 </head>
 <body>
@@ -65,35 +93,80 @@
     <button class="start-btn" onclick="startDrill()">Start!</button>
     <br>
     <button class="logout-btn" onclick="goBack()">Exit</button>
+    <h3>Badges</h3> 
+    <div id="badgesContainer" class="badge-grid"></div>
 </div>
 
 
-<script>
-
-    ////populate student info from local storage
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { firebaseConfig } from './firebase-config.js';
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    // Retrieve info
     const studentName = localStorage.getItem("selectedStudentName");
     const selectedSubject = localStorage.getItem("selectedSubject");
-
-    if(studentName) {
-        document.getElementById("studentName").textContent = studentName;
+    const studentId = localStorage.getItem("selectedStudentId");
+    const teacherUid = localStorage.getItem("teacherUid"); // This should be stored at login
+    
+    if (studentName) {
+      document.getElementById("studentName").textContent = studentName;
     }
-
-    if(selectedSubject) {
-        document.getElementById("selectedDrill").textContent = selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1);
+    if (selectedSubject) {
+      document.getElementById("selectedDrill").textContent = selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1);
     }
-
+    
     function startDrill() {
-        if(selectedSubject){
-            window.location.href = `${selectedSubject}.html`;
-        }
+      if (selectedSubject) {
+        window.location.href = `${selectedSubject}.html`;
+      }
     }
-
+    
     function goBack() {
-        // Redirect back to home page
-        window.location.href = "dashboard.html";
+      window.location.href = "dashboard.html";
     }
-
-</script>
-
+    
+    // Badge display
+    const badgeContainer = document.getElementById("badgesContainer");
+    
+    const badgeList = [
+      { key: "first_drill_completed", label: "First Drill" },
+      { key: "addition_master", label: "Addition Master" },
+      { key: "subtraction_master", label: "Subtraction Master" },
+      { key: "multiplication_master", label: "Multiplication Master" },
+      { key: "division_master", label: "Division Master" },
+      { key: "streak_3_days", label: "3-Day Streak" }
+    ];
+    
+    async function loadBadges() {
+      if (!teacherUid || !studentId) return;
+    
+      const studentRef = doc(db, "users", teacherUid, "students", studentId);
+      const snapshot = await getDoc(studentRef);
+    
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        const badges = data.badges || {};
+    
+        badgeContainer.innerHTML = "";
+    
+        badgeList.forEach(badge => {
+          const div = document.createElement("div");
+          div.className = "badge";
+          if (badges[badge.key]) div.classList.add("earned");
+          div.textContent = badge.label;
+          badgeContainer.appendChild(div);
+        });
+      } else {
+        badgeContainer.innerHTML = "<p>Unable to load badges.</p>";
+      }
+    }
+    
+    loadBadges();
+    </script>
+    
 </body>
 </html>
