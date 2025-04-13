@@ -129,8 +129,14 @@
       }
     };
     
+    //ensuring that when going back to the teacher dashboard
+    //student data will be cleared and wont interfere with each other
     window.goBack = function() {
-      window.location.href = "dashboard.html";
+        localStorage.removeItem("selectedStudentId");
+        localStorage.removeItem("selectedStudentName");
+        localStorage.removeItem("selectedSubject");
+        localStorage.removeItem("earnedBadges");
+        window.location.href = "dashboard.html";
     };
     
     // Badge display
