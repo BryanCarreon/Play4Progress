@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { firebaseConfig } from './firebase-config.js'; // adjust path if needed
 const app = initializeApp(firebaseConfig);
@@ -50,31 +50,77 @@ function generateDivisionProblem(level) {
     document.getElementById("question").textContent = `${num1} / ${num2} = ?`;
 }
 
-function checkAnswer() {
+async function checkAnswer() {
     if (!gameActive) return;
     let userAnswer = parseInt(document.getElementById("answer").value);
     let feedback = document.getElementById("feedback");
+
     if (userAnswer === correctAnswer) {
         feedback.textContent = "Correct!";
         feedback.style.color = "green";
         correctAnswers++;
         progress = (correctAnswers % 5) * 20;
         document.querySelector(".progress-bar").style.height = progress + "%";
+
         if (correctAnswers % 5 === 0) {
             const completedLevel = `level ${level}`;
-            // Update Firestore with completed level
-            const studentRef = doc(db, "users", auth.currentUser.uid, "students", selectedId);
-            updateDoc(studentRef, {
-              [`progress.division.${completedLevel}`]: "complete"
-            })
-            //;
-            .then(() => {
-                console.log(`Saved: ${completedLevel} marked complete for ${selectedId}`);
-            })
-            .catch((error) => {
-                console.error("Error updating progress:", error);
-            });
-
+            const teacherUid = localStorage.getItem("teacherUid");
+            const studentRef = doc(db, "users", teacherUid, "students", selectedId);
+          
+            try {
+              // 1. Mark the level complete
+              await updateDoc(studentRef, {
+                [`progress.division.${completedLevel}`]: "complete"
+              });
+          
+              console.log(`Saved: ${completedLevel} marked complete for ${selectedId}`);
+          
+              // 2. Load latest student data to evaluate badges
+              const snap = await getDoc(studentRef);
+              const studentData = snap.data();
+              const progress = studentData.progress || {};
+              const badges = studentData.badges || {};
+          
+              // 3. Badge logic
+              let updated = false;
+          
+              // "Check" First drill completed for any subject
+              if (!badges.first_drill_completed) {
+                const anyDrillStarted = ["addition", "subtraction", "multiplication", "division"]
+                    .some(subject => (progress[subject]?.["level 1"] === "complete"));
+                if (anyDrillStarted) {
+                    badges.first_drill_completed = true;
+                    updated = true;
+                    alert("🏁 You earned the First Drill badge!");
+                    const earned = JSON.parse(localStorage.getItem("earnedBadges") || "{}");
+                    earned.first_drill_completed = true;
+                    localStorage.setItem("earnedBadges", JSON.stringify(earned));
+                }
+              }
+          
+              // "Check" Multiplicatoin Master - all levels complete
+              const divisionProgress = progress.division || {};
+              const allDivisionComplete = Object.values(divisionProgress).every(v => v === "complete");
+              if (allDivisionComplete && !badges.division_master) {
+                badges.division_master = true;
+                updated = true;
+                alert("➕ You earned the Multiplication Master badge!");
+                //store the newly eaned badge in localStorage to sync with home page
+                const earned = JSON.parse(localStorage.getItem("earnedBadges") || "{}");
+                earned.division_master = true;
+                localStorage.setItem("earnedBadges", JSON.stringify(earned));
+              }
+          
+              // 4. Save badge updates
+              if(updated){
+                await updateDoc(studentRef, { badges });
+              }
+          
+            } catch (error) {
+              console.error("Error updating progress or badges:", error);
+            }
+          
+            // 5. Move to next level
             level = Math.min(level + 1, 4);
             alert(`Great job! Moving to level ${level}.`);
         }
@@ -96,9 +142,7 @@ window.onload = function() {
 };
 
 function endGame() {
-    localStorage.removeItem("selectedStudentId");
-    localStorage.removeItem("selectedStudentName");
-    window.location.href = "dashboard.html";
+    window.location.href = "student_home_page.html";
   }
   
 window.checkAnswer = checkAnswer;
