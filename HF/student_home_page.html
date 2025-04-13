@@ -147,6 +147,8 @@
 
     
     async function loadBadges() {
+        console.log("teacherUid:", teacherUid, "| studentId:", studentId);
+
         badgeContainer.innerHTML = "";
 
         if (!teacherUid || !studentId) {
@@ -163,22 +165,15 @@
             const data = snapshot.data();
             badges = data.badges || {};
 
-            // Optional fallback: if badges are missing entirely
-            if (Object.keys(badges).length === 0) {
-                console.warn("No badges found in Firestore. Falling back to test badges.");
-                badges = {
-                    first_drill_completed: true,
-                    addition_master: false,
-                    subtraction_master: true,
-                    multiplication_master: false,
-                    division_master: true,
-                    streak_3_days: false
-                };
-            }
-        } else {
-            badgeContainer.innerHTML = "<p>Unable to load student data.</p>";
-            return;
+            //merge newly earned badges sotred locally
+            const localBadges = JSON.parse(localStorage.getItem("earnedBadges") || "{}");
+            badges = {...badges, ...localBadges };
+
+        }else {
+        badgeContainer.innerHTML = "<p>Unable to load student data.</p>";
+        return;
         }
+
 
         // Render each badge
         badgeList.forEach(badge => {
@@ -195,6 +190,8 @@
             `;
             badgeContainer.appendChild(div);
         });
+        //clear temporary local badge cache
+        localStorage.removeItem("earnedBadges");
     }  
       
        
