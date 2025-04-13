@@ -82,15 +82,20 @@ async function checkAnswer() {
               const badges = studentData.badges || {};
           
               // 3. Badge logic
+              let updated = false;
           
-              // "Check" First drill completed
+              // "Check" First drill completed for any subject
               if (!badges.first_drill_completed) {
-                badges.first_drill_completed = true;
-                alert("🏁 You earned the First Drill badge!");
-                //store the newly eaned badge in localStorage to sync with home page
-                const earned = JSON.parse(localStorage.getItem("earnedBadges") || "{}");
-                earned.first_drill_completed = true;
-                localStorage.setItem("earnedBadges", JSON.stringify(earned));
+                const anyDrillStarted = ["addition", "subtraction", "multiplication", "division"]
+                    .some(subject => (progress[subject]?.["level 1"] === "complete"));
+                if (anyDrillStarted) {
+                    badges.first_drill_completed = true;
+                    updated = true;
+                    alert("🏁 You earned the First Drill badge!");
+                    const earned = JSON.parse(localStorage.getItem("earnedBadges") || "{}");
+                    earned.first_drill_completed = true;
+                    localStorage.setItem("earnedBadges", JSON.stringify(earned));
+                }
               }
           
               // "Check" Addition Master - all levels complete
@@ -98,6 +103,7 @@ async function checkAnswer() {
               const allAdditionComplete = Object.values(additionProgress).every(v => v === "complete");
               if (allAdditionComplete && !badges.addition_master) {
                 badges.addition_master = true;
+                updated = true;
                 alert("➕ You earned the Addition Master badge!");
                 //store the newly eaned badge in localStorage to sync with home page
                 const earned = JSON.parse(localStorage.getItem("earnedBadges") || "{}");
@@ -106,7 +112,9 @@ async function checkAnswer() {
               }
           
               // 4. Save badge updates
-              await updateDoc(studentRef, { badges });
+              if(updated){
+                await updateDoc(studentRef, { badges });
+              }
           
             } catch (error) {
               console.error("Error updating progress or badges:", error);
