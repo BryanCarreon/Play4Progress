@@ -47,6 +47,13 @@ if (loginButton) {
 
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
+        //creating a "user" variable to reference when loading 
+        //the students of the logged in teacher/user
+        const user = userCredential.user;
+
+        //save the teahcer UID to localstorage
+        localStorage.setItem("teacherUid", user.uid);
+        
         alert("Login successful!");
         window.location.href = "dashboard.html";
       })

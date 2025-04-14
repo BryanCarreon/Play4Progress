@@ -54,6 +54,34 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        .badge-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .badge {
+            width: 100px;
+            height: 100px;
+            background-color: lightgray;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            text-align: center;
+            padding: 8px;
+            color: #fff;
+            font-weight: bold;
+            transition: 0.3s;
+            filter: grayscale(100%); /* greys out unearned badges */
+        }
+        .badge.earned {
+            background-color: #ffc107; /* gold */
+            filter: grayscale(0%); /* full color if earned */
+        }
+
     </style>
 </head>
 <body>
@@ -61,31 +89,121 @@
 <div class="container">
     <h2>Welcome Back, <span id="studentName">Student!</span></h2>
     <p>Selected Drill:</p>
-    <div class="drill-box" id="selectedDrill">Addition</div>
+    <div class="drill-box" id="selectedDrill">Loading ...</div>
     <button class="start-btn" onclick="startDrill()">Start!</button>
     <br>
     <button class="logout-btn" onclick="goBack()">Exit</button>
+    <h3>Badges</h3> 
+    <div id="badgesContainer" class="badge-grid"></div>
 </div>
 
 
-<script>
 
-    ////populate student name from local storage
+<script type="module">
+    //type module so that i can import from auth.js
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { firebaseConfig } from './firebase-config.js';
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    // Retrieve info
     const studentName = localStorage.getItem("selectedStudentName");
-    if(studentName) {
-        document.getElementById("studentName").textContent = studentName;
+    const selectedSubject = localStorage.getItem("selectedSubject");
+    const studentId = localStorage.getItem("selectedStudentId");
+    const teacherUid = localStorage.getItem("teacherUid"); // This should be stored at login//just added it
+    
+    if (studentName) {
+      document.getElementById("studentName").textContent = studentName;
     }
-
-    function startDrill() {
-        // Redirect to drill page (you can change 'drill.html' to the actual drill page)
-        window.location.href = "addition.html";
+    if (selectedSubject) {
+      document.getElementById("selectedDrill").textContent = selectedSubject.charAt(0).toUpperCase() + selectedSubject.slice(1);
     }
-
-    function goBack() {
-        // Redirect back to home page
+    
+    //attaching window make the function globally accessible even 
+    //from a <script type="modlue"
+    window.startDrill = function() {
+      if (selectedSubject) {
+        window.location.href = `${selectedSubject}.html`;
+      }
+    };
+    
+    //ensuring that when going back to the teacher dashboard
+    //student data will be cleared and wont interfere with each other
+    window.goBack = function() {
+        localStorage.removeItem("selectedStudentId");
+        localStorage.removeItem("selectedStudentName");
+        localStorage.removeItem("selectedSubject");
+        localStorage.removeItem("earnedBadges");
         window.location.href = "dashboard.html";
-    }
-</script>
+    };
+    
+    // Badge display
+    const badgeContainer = document.getElementById("badgesContainer");
+    
+    const badgeList = [
+        { key: "first_drill_completed", label: "First Drill", icon: "🏁" },
+        { key: "addition_master", label: "Addition Master", icon: "➕" },
+        { key: "subtraction_master", label: "Subtraction Master", icon: "➖" },
+        { key: "multiplication_master", label: "Multiplication Master", icon: "✖️" },
+        { key: "division_master", label: "Division Master", icon: "➗" },
+        { key: "streak_3_days", label: "3-Day Streak", icon: "🔥" }
+    ];
 
+    
+    async function loadBadges() {
+        console.log("teacherUid:", teacherUid, "| studentId:", studentId);
+
+        badgeContainer.innerHTML = "";
+
+        if (!teacherUid || !studentId) {
+            console.warn("Missing teacherUid or studentId.");
+            return;
+        }
+
+        const studentRef = doc(db, "users", teacherUid, "students", studentId);
+        const snapshot = await getDoc(studentRef);
+
+        let badges = {};
+
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            badges = data.badges || {};
+
+            //merge newly earned badges sotred locally
+            const localBadges = JSON.parse(localStorage.getItem("earnedBadges") || "{}");
+            badges = {...badges, ...localBadges };
+
+        }else {
+        badgeContainer.innerHTML = "<p>Unable to load student data.</p>";
+        return;
+        }
+
+
+        // Render each badge
+        badgeList.forEach(badge => {
+            const earned = badges[badge.key];
+            console.log(`Rendering badge: ${badge.key} | earned: ${earned}`);
+
+            const div = document.createElement("div");
+            div.className = "badge";
+            if (earned) div.classList.add("earned");
+
+            div.innerHTML = `
+                <div style="font-size: 28px;">${badge.icon}</div>
+                <div style="font-size: 12px; margin-top: 5px;">${badge.label}</div>
+            `;
+            badgeContainer.appendChild(div);
+        });
+        //clear temporary local badge cache
+        localStorage.removeItem("earnedBadges");
+    }  
+      
+       
+    
+    loadBadges();
+    </script>
+    
 </body>
 </html>
