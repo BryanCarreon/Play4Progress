@@ -1,21 +1,25 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { firebaseConfig } from './firebase-config.js';
 
+// Initialize Firebase services
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Get student and teacher IDs from local storage
 const selectedId = localStorage.getItem("selectedStudentId");
 const selectedName = localStorage.getItem("selectedStudentName");
 const teacherUid = localStorage.getItem("teacherUid");
 
+// Redirect if any required data is missing
 if (!selectedId || !selectedName || !teacherUid) {
   alert("No student selected. Redirecting to dashboard...");
   window.location.href = "./dashboard.html";
 }
 
+// Initial state
 let level = 1;
 let correctAnswers = 0;
 let correctAnswer;
@@ -24,17 +28,21 @@ let timeLeft = 300;
 let gameActive = true;
 let progress = 0;
 
+// Determine the starting level based on progress
 async function determineStartingLevel() {
   const studentRef = doc(db, "users", teacherUid, "students", selectedId);
   const snapshot = await getDoc(studentRef);
   const data = snapshot.data();
   const additionProgress = data.progress?.addition || {};
   for (let i = 1; i <= 4; i++) {
-    if (additionProgress[`level ${i}`] !== "complete") return i;
+    if (additionProgress[`level ${i}`] !== "complete") {
+      return i;
+    }
   }
   return 5; // All levels complete
 }
 
+// Start or reset the countdown timer
 function startTimer() {
   clearInterval(timer);
   timeLeft = 300;
@@ -52,6 +60,7 @@ function startTimer() {
   }, 1000);
 }
 
+// Generate an addition problem for the current level
 function generateAdditionProblem(level) {
   if (!gameActive) return;
 
@@ -75,9 +84,9 @@ function generateAdditionProblem(level) {
   document.getElementById("question").textContent = `${num1} + ${num2} = ?`;
 }
 
+// Handle answer checking and badge logic
 async function checkAnswer() {
-  if (!gameActive || level > 4) return;
-
+  if (!gameActive) return;
   let userAnswer = parseInt(document.getElementById("answer").value);
   let feedback = document.getElementById("feedback");
 
@@ -93,6 +102,7 @@ async function checkAnswer() {
       const studentRef = doc(db, "users", teacherUid, "students", selectedId);
 
       try {
+        // Mark level complete
         await updateDoc(studentRef, {
           [`progress.addition.${completedLevel}`]: "complete"
         });
@@ -103,10 +113,11 @@ async function checkAnswer() {
         const badges = studentData.badges || {};
         let updated = false;
 
+        // First drill badge logic
         if (!badges.first_drill_completed) {
-          const anyDrill = ["addition", "subtraction", "multiplication", "division"]
-            .some(subject => progress[subject]?.["level 1"] === "complete");
-          if (anyDrill) {
+          const anyDrillStarted = ["addition", "subtraction", "multiplication", "division"]
+            .some(subject => (progress[subject]?.["level 1"] === "complete"));
+          if (anyDrillStarted) {
             badges.first_drill_completed = true;
             updated = true;
             alert("🏁 You earned the First Drill badge!");
@@ -116,6 +127,29 @@ async function checkAnswer() {
           }
         }
 
+        // Streak badge logic
+        const today = new Date();
+        const lastDate = studentData.lastCompletedDate ? new Date(studentData.lastCompletedDate) : null;
+        let streak = studentData.streakCount || 1;
+
+        if (lastDate) {
+          const diff = (today - lastDate) / (1000 * 60 * 60 * 24);
+          if (diff === 1) streak++;
+          else if (diff > 1) streak = 1;
+        }
+
+        const updates = { lastCompletedDate: today.toISOString(), streakCount: streak };
+
+        if (streak >= 3 && !badges.streak_3_days) {
+          badges.streak_3_days = true;
+          updated = true;
+          alert("🔥 You earned the 3-Day Streak badge!");
+          const earned = JSON.parse(localStorage.getItem("earnedBadges") || "{}");
+          earned.streak_3_days = true;
+          localStorage.setItem("earnedBadges", JSON.stringify(earned));
+        }
+
+        // Addition master badge logic
         const additionProgress = progress.addition || {};
         const allAdditionComplete = Object.values(additionProgress).every(v => v === "complete");
         if (allAdditionComplete && !badges.addition_master) {
@@ -127,13 +161,16 @@ async function checkAnswer() {
           localStorage.setItem("earnedBadges", JSON.stringify(earned));
         }
 
-        if (updated) await updateDoc(studentRef, { badges });
+        if (updated) updates.badges = badges;
 
-      } catch (err) {
-        console.error("Error updating badges or progress:", err);
+        await updateDoc(studentRef, updates);
+
+      } catch (error) {
+        console.error("Error updating progress or badges:", error);
       }
 
-      level = level + 1;
+      // Move to next level
+      level++;
       correctAnswers = 0;
       presentProblem();
 
@@ -146,7 +183,6 @@ async function checkAnswer() {
     feedback.textContent = `Incorrect! The correct answer was ${correctAnswer}.`;
     feedback.style.color = "red";
   }
-
   document.getElementById("answer").value = "";
   setTimeout(presentProblem, 1000);
 }
@@ -155,6 +191,7 @@ function presentProblem() {
   generateAdditionProblem(level);
 }
 
+// Load the student's current level and start the game
 window.onload = async function () {
   level = await determineStartingLevel();
   presentProblem();
