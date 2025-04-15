@@ -24,7 +24,7 @@ let level = 1;
 let correctAnswers = 0;
 let correctAnswer;
 let timer;
-let timeLeft = 300;
+let timeLeft = 90;
 let gameActive = true;
 let progress = 0;
 
@@ -45,7 +45,7 @@ async function determineStartingLevel() {
 // Start or reset the countdown timer
 function startTimer() {
   clearInterval(timer);
-  timeLeft = 300;
+  timeLeft = 90;
   timer = setInterval(() => {
     if (timeLeft <= 0) {
       clearInterval(timer);
