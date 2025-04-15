@@ -26,8 +26,9 @@
 1. Clone or download the repository.
 2. Open the project folder in VS Code.
 3. Install the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension.
-4. Launch `login.html` with Live Server.
-5. Create an account and start exploring!
+4. Launch `signup.html` with Live Server.
+5. It will redirect you to login.
+5. Login with created account and start exploring!
 
 ⚠️ You'll need your own Firebase project — replace the credentials inside `firebase-config.js`.
 
