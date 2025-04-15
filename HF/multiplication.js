@@ -183,8 +183,14 @@ async function checkAnswer() {
     feedback.style.color = "red";
   }
 
+  //clear input
   document.getElementById("answer").value = "";
-  setTimeout(presentProblem, 1000);
+
+  //clear feedback and show next question after short delay
+  setTimeout(() => {
+    document.getElementById("feedback").textContent = "";
+    presentProblem();
+  }, 1000);
 }
 
 function presentProblem() {
