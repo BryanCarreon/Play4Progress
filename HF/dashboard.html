@@ -1,53 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teacher Dashboard</title>
   <style>
-    tr:hover {
-      background-color: #a5a2a2;
-    }
-    table {
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 8px;
-    }
-    button:hover {
-      color: rgb(20, 159, 55);
-      transform: scale(1.1);
-    }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f7f9;
+  margin: 0;
+  padding: 40px 20px;
+  color: #333;
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+  margin-bottom: 10px;
+}
+
+#logoutButton {
+  float: right;
+  padding: 8px 16px;
+  background-color: #ff4b5c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#logoutButton:hover {
+  background-color: #e63946;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+thead {
+  background-color: #007bff;
+  color: white;
+}
+
+th, td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* ✅ Only hover body rows, not headers */
+tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+.add-student {
+  margin-top: 30px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+input[type="text"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 200px;
+  font-size: 14px;
+}
+
+h4 {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .add-student {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #logoutButton {
+    float: none;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  table, th, td {
+    font-size: 14px;
+  }
+}
+
   </style>
 </head>
 <body>
-  <h2>Welcome, <span id="userEmailDisplay"></span></h2>
-  <button id="logoutButton">Log Out</button>
+  <div class="container">
+    <h2>
+      Welcome, <span id="userEmailDisplay"></span>
+      <button id="logoutButton">Log Out</button>
+    </h2>
 
-  <h3>Your Students</h3>
-  <table border="2" >
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Addition</th>
-        <th>Subtraction</th>
-        <th>Multiplication</th>
-        <th>Division</th>
-        <!-- <th>Progress</th> -->
-        <!-- <th>Actions</th> -->
-      </tr>
-    </thead>
-    <tbody id="studentTableBody">
-      <!-- Populated by JS -->
-    </tbody>
-  </table>
+    <h3>Your Students</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Addition</th>
+          <th>Subtraction</th>
+          <th>Multiplication</th>
+          <th>Division</th>
+        </tr>
+      </thead>
+      <tbody id="studentTableBody">
+        <!-- Dynamically populated -->
+      </tbody>
+    </table>
 
-  <h4>Add New Student</h4>
-  <input type="text" id="newStudentName" placeholder="Student Name">
-  <button id="addStudentButton">Add Student</button>
+    <div class="add-student">
+      <h4>Add New Student</h4>
+      <input type="text" id="newStudentName" placeholder="Student Name" />
+      <button id="addStudentButton">Add Student</button>
+    </div>
+  </div>
 
   <script type="module" src="dashboard.js"></script>
   <script type="module" src="auth.js"></script>
-
-
 </body>
 </html>

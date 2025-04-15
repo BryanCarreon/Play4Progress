@@ -76,10 +76,16 @@ function generateDivisionProblem(level) {
   }
 
   const ranges = { 1: [1, 5], 2: [1, 10], 3: [1, 15], 4: [1, 20] };
-  let [min, max] = ranges[level] || [1, 5];
+  let [min, max] = ranges[level];
+
   let divisor = Math.floor(Math.random() * (max - min + 1)) + min;
+  if(divisor == 0){
+    divisior = 1;
+  }
+
   let quotient = Math.floor(Math.random() * (max - min + 1)) + min;
   let dividend = divisor * quotient;
+  
   correctAnswer = quotient;
   document.getElementById("question").textContent = `${dividend} / ${divisor} = ?`;
 }
@@ -183,8 +189,14 @@ async function checkAnswer() {
     feedback.style.color = "red";
   }
 
+  //clear input
   document.getElementById("answer").value = "";
-  setTimeout(presentProblem, 1000);
+
+  //clear feedback and show next question after short delay
+  setTimeout(() => {
+    document.getElementById("feedback").textContent = "";
+    presentProblem();
+  }, 1000);
 }
 
 function presentProblem() {
