@@ -1,29 +1,48 @@
-# README #
+# Play4Progress
 
-This README would normally document whatever steps are necessary to get your application up and running.
+**Play4Progress** is a fun and educational web-based math practice platform designed for students in grades 1–3. It makes learning math exciting by using level-based drills and a badge reward system.
 
-### What is this repository for? ###
+---
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+## Features
 
-### How do I get set up? ###
+- Kid-friendly design and interface
+- Math drills for addition, subtraction, multiplication, and division
+- Progress tracking per student
+- Badges earned for completing milestones (e.g., all levels or streaks)
+- Secure login and student selection system (via Firebase)
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+---
 
-### Contribution guidelines ###
+## Tech Stack
 
-* Writing tests
-* Code review
-* Other guidelines
+- **Frontend:** HTML, CSS, Vanilla JavaScript  
+- **Backend:** Firebase Firestore + Authentication
 
-### Who do I talk to? ###
+---
 
-* Repo owner or admin
-* Other community or team contact
+## Running Locally
+
+1. Clone or download the repository.
+2. Open the project folder in VS Code.
+3. Install the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension.
+4. Launch `login.html` with Live Server.
+5. Create an account and start exploring!
+
+⚠️ You'll need your own Firebase project — replace the credentials inside `firebase-config.js`.
+
+---
+
+## Future Ideas
+
+- ✨ Sound effects or animations for correct answers
+- 👨‍👩‍👧 Parent portal for tracking progress
+- 🏆 Custom badge challenges and advanced levels
+
+---
+
+## Author
+
+Created by **[Rigo Lizaola, Bryan Carreon, and Jazmin Rodriguez]**
+
+---
