@@ -30,8 +30,6 @@
 5. It will redirect you to login.
 5. Login with created account and start exploring!
 
-⚠️ You'll need your own Firebase project — replace the credentials inside `firebase-config.js`.
-
 ---
 
 ## Future Ideas
