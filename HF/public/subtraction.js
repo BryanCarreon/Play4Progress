@@ -68,17 +68,20 @@ function generateSubtractionProblem(level) {
     clearInterval(timer);
     gameActive = false;
     document.getElementById("question").textContent = "🎉 All levels complete!";
+    document.getElementById("answer").value = "";
     document.getElementById("answer").disabled = true;
     document.querySelector(".submit-btn").disabled = true;
     document.getElementById("timer").textContent = "✔️ Done!";
-    alert("🎉 You’ve completed all subtraction levels!");
+    alert("🎉 You’ve completed all addition levels!");
     return;
   }
 
   const ranges = { 1: [1, 5], 2: [1, 10], 3: [1, 15], 4: [1, 20] };
-  let [min, max] = ranges[level] || [1, 5];
-  let num1 = Math.floor(Math.random() * (max - min + 1)) + min;
-  let num2 = Math.floor(Math.random() * (max - min + 1)) + min;
+  let [minVal, maxVal] = ranges[level] || [1, 5];
+  let num1 = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
+  let num2 = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
+  
+  // Ensure num1 is always >= num2 to avoid negative answers
   if (num2 > num1) [num1, num2] = [num2, num1];
   correctAnswer = num1 - num2;
   document.getElementById("question").textContent = `${num1} - ${num2} = ?`;
@@ -184,7 +187,7 @@ async function checkAnswer() {
     feedback.style.color = "red";
   }
 
-  d//clear input
+  //clear input
   document.getElementById("answer").value = "";
 
   //clear feedback and show next question after short delay

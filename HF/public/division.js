@@ -87,7 +87,7 @@ function generateDivisionProblem(level) {
   let dividend = divisor * quotient;
   
   correctAnswer = quotient;
-  document.getElementById("question").textContent = `${dividend} / ${divisor} = ?`;
+  document.getElementById("question").textContent = `${dividend} ÷ ${divisor} = ?`;
 }
 
 // Handle answer checking and badge logic
