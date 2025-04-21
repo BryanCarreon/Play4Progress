@@ -80,6 +80,9 @@ function generateSubtractionProblem(level) {
   let [minVal, maxVal] = ranges[level] || [1, 5];
   let num1 = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
   let num2 = Math.floor(Math.random() * (maxVal - minVal + 1)) + minVal;
+  
+  // Ensure num1 is always >= num2 to avoid negative answers
+  if (num2 > num1) [num1, num2] = [num2, num1];
   correctAnswer = num1 - num2;
   document.getElementById("question").textContent = `${num1} - ${num2} = ?`;
 }
