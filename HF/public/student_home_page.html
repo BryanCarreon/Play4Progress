@@ -203,6 +203,7 @@
   <h2>Welcome Back, <span id="studentName">Student!</span></h2>
   <p>Selected Drill:</p>
   <div class="drill-box" id="selectedDrill">Loading ...</div>
+  <p id="currentLevel" style="margin-top: 10px; font-size: 18px; color: #555;">Loading Level...</p>
   <button class="start-btn" onclick="startDrill()">Start!</button>
   <br>
   <button class="logout-btn" onclick="goBack()">Exit</button>
@@ -308,8 +309,48 @@
     localStorage.removeItem("earnedBadges");
   }
 
+  //Load current level for the selected drill from database
+  async function loadCurrentLevel() {
+    if (!teacherUid || !studentId || !selectedSubject) return;
+
+    const studentRef = doc(db, "users", teacherUid, "students", studentId);
+    const snapshot = await getDoc(studentRef);
+
+    if (snapshot.exists()) {
+      const data = snapshot.data();
+      const progress = data.progress?.[selectedSubject] || {};
+
+      // Find the lowest incomplete level
+      let levelNumber = 1;
+      for (let i = 1; i <= 4; i++) {
+        if (progress[`level ${i}`] !== "complete") {
+          levelNumber = i;
+          break;
+        }
+      }
+
+      // If all complete
+      if (Object.values(progress).every(v => v === "complete")) {
+        levelNumber = 5; // All done
+      }
+
+      // Display
+      const currentLevelElement = document.getElementById("currentLevel");
+      if (currentLevelElement) {
+        if (levelNumber <= 4) {
+          currentLevelElement.textContent = `Current Level: ${levelNumber}`;
+        } else {
+          currentLevelElement.textContent = `✅ All levels completed!`;
+        }
+      }
+    }
+  }
+
+
   // Initial loading of badges
   loadBadges();
+  // Initial loading of current level of drill
+  loadCurrentLevel();
 </script>
 
 </body>

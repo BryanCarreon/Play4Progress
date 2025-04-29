@@ -61,7 +61,7 @@ function startTimer() {
 }
 
 // Generate a subtraction problem
-function generateSubtractionProblem(level) {
+async function generateSubtractionProblem(level) {
   if (!gameActive) return;
 
   if (level > 4) {
@@ -72,7 +72,7 @@ function generateSubtractionProblem(level) {
     document.getElementById("answer").disabled = true;
     document.querySelector(".submit-btn").disabled = true;
     document.getElementById("timer").textContent = "✔️ Done!";
-    alert("🎉 You’ve completed all addition levels!");
+    await showBadgePopup("🎉 You’ve completed all subtraction levels!");
     return;
   }
 
@@ -85,6 +85,38 @@ function generateSubtractionProblem(level) {
   if (num2 > num1) [num1, num2] = [num2, num1];
   correctAnswer = num1 - num2;
   document.getElementById("question").textContent = `${num1} - ${num2} = ?`;
+}
+
+function showBadgePopup(message) {
+  return new Promise((resolve) => {
+    const popup = document.createElement("div");
+    popup.innerHTML = `
+      <div style="
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fffae6;
+        padding: 30px 40px;
+        border-radius: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        font-size: 22px;
+        font-weight: bold;
+        color: #ff6f61;
+        z-index: 9999;
+        animation: popIn 0.5s ease;
+      ">
+        ${message}
+      </div>
+    `;
+    document.body.appendChild(popup);
+
+    //Go away after 3 seconds
+    setTimeout(() => {
+      popup.remove();
+      resolve();  //when popup disappears, resolve the promise
+    }, 3000);
+  });
 }
 
 // Handle answer checking and badge logic
@@ -123,7 +155,7 @@ async function checkAnswer() {
           if (anyDrillStarted) {
             badges.first_drill_completed = true;
             updated = true;
-            alert("🏁 You earned the First Drill badge!");
+            await showBadgePopup("🏁 You earned the First Drill badge!");
             const earned = JSON.parse(localStorage.getItem("earnedBadges") || "{}");
             earned.first_drill_completed = true;
             localStorage.setItem("earnedBadges", JSON.stringify(earned));
@@ -146,7 +178,7 @@ async function checkAnswer() {
         if (streak >= 3 && !badges.streak_3_days) {
           badges.streak_3_days = true;
           updated = true;
-          alert("🔥 You earned the 3-Day Streak badge!");
+          await showBadgePopup("🔥 You earned the 3-Day Streak badge!");
           const earned = JSON.parse(localStorage.getItem("earnedBadges") || "{}");
           earned.streak_3_days = true;
           localStorage.setItem("earnedBadges", JSON.stringify(earned));
@@ -158,7 +190,7 @@ async function checkAnswer() {
         if (allSubtractionComplete && !badges.subtraction_master) {
           badges.subtraction_master = true;
           updated = true;
-          alert("➖ You earned the Subtraction Master badge!");
+          await showBadgePopup("➖ You earned the Subtraction Master badge!");
           const earned = JSON.parse(localStorage.getItem("earnedBadges") || "{}");
           earned.subtraction_master = true;
           localStorage.setItem("earnedBadges", JSON.stringify(earned));
@@ -179,7 +211,7 @@ async function checkAnswer() {
 
       if (level <= 4) {
         startTimer();
-        alert(`Great job! Moving to level ${level}`);
+        await showBadgePopup(`Great job! Moving to level ${level}`);
       }
     }
   } else {
