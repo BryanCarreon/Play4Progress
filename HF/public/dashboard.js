@@ -1,3 +1,4 @@
+// Firebase App Initialization
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getAuth,
@@ -17,24 +18,28 @@ import {
 
 import { firebaseConfig } from './firebase-config.js';
 
-// Initialize Firebase
+// Initialize Firebase services
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// DOM Elements
+// DOM references
 const userEmailDisplay = document.getElementById("userEmailDisplay");
 const addStudentButton = document.getElementById("addStudentButton");
 const studentTableBody = document.getElementById("studentTableBody");
 
-// Helper function to generate status circle
+/**
+ * Generates a status circle to indicate if all levels in a subject are complete.
+ * @param {Object} subjectProgress - The progress object for a subject.
+ * @returns {string} - HTML span element with appropriate class.
+ */
 function getStatusCircle(subjectProgress) {
   const allComplete = Object.values(subjectProgress || {}).every(status => status === "complete");
   const className = allComplete ? "status-circle status-complete" : "status-circle status-incomplete";
   return `<span class="${className}"></span>`;
 }
 
-// Load user and display students
+// When user auth state changes (login/logout), update UI
 onAuthStateChanged(auth, async (user) => {
   if (!user) return window.location.href = "login.html";
 
@@ -51,7 +56,8 @@ onAuthStateChanged(auth, async (user) => {
 
     const progressDisplays = subjects.map(subject => {
       const subjectProgress = progress[subject] || {};
-    
+
+      // Generate a row of levels with colored status circles
       const levelsHTML = Object.entries(subjectProgress)
         .sort(([a], [b]) => parseInt(a.split(" ")[1]) - parseInt(b.split(" ")[1]))
         .map(([level, status]) => {
@@ -60,7 +66,7 @@ onAuthStateChanged(auth, async (user) => {
                     <span class="${circleClass}"></span> ${level}
                   </div>`;
         }).join("");
-    
+
       return `
         <div class="subject-cell">
           <div class="levels">${levelsHTML}</div>
@@ -68,8 +74,8 @@ onAuthStateChanged(auth, async (user) => {
         </div>
       `;
     });
-    
 
+    // Append student row to table
     row.innerHTML = `
       <td>${student.name}</td>
       <td>${progressDisplays[0]}</td>
@@ -91,7 +97,10 @@ onAuthStateChanged(auth, async (user) => {
   });
 });
 
-// Add student
+/**
+ * Handles adding a new student to the Firestore database.
+ * Validates input, checks for duplicate names, and sets up default progress structure.
+ */
 if (addStudentButton) {
   addStudentButton.addEventListener("click", async () => {
     const nameInput = document.getElementById("newStudentName");
@@ -104,8 +113,8 @@ if (addStudentButton) {
 
     const studentId = studentName.replace(/\s+/g, "_").toLowerCase();
     const studentRef = doc(db, "users", auth.currentUser.uid, "students", studentId);
-
     const existing = await getDoc(studentRef);
+
     if (existing.exists()) {
       alert("A student with this name already exists.");
       return;
@@ -139,14 +148,22 @@ if (addStudentButton) {
   });
 }
 
-// Remove student from Firestore
+/**
+ * Removes a student document from Firestore.
+ * @param {string} studentId - The ID of the student to be deleted.
+ */
 window.removeStudent = async (studentId) => {
   const studentDoc = doc(db, "users", auth.currentUser.uid, "students", studentId);
   await deleteDoc(studentDoc);
   window.location.reload();
 };
 
-// Set current student + redirect to student home page
+/**
+ * Stores selected student and subject in localStorage and navigates to the drill page.
+ * @param {string} id - Firestore doc ID of student.
+ * @param {string} name - Name of the student.
+ * @param {string} subject - Subject to drill into (e.g., addition).
+ */
 window.selectSubject = (id, name, subject) => {
   localStorage.setItem("selectedStudentId", id);
   localStorage.setItem("selectedStudentName", name);
